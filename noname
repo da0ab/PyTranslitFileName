@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import sys
+from transliterate import translit #pip3 install transliterate
+
+def sanitize_filename(filename):
+    filename = filename.lower()  # Приводим к нижнему регистру
+    filename = filename.replace(' ', '-')  # Заменяем пробелы на тире
+    filename = translit(filename, 'ru', reversed=True)  # Заменяем русские буквы на латиницу
+    filename = re.sub(r'[^a-zA-Zа-яА-Я0-9-]', '', filename)  # Удаляем специальные символы
+    return filename
+
+def rename_files_in_directory(directory):
+    for filename in os.listdir(directory):
+        name, ext = os.path.splitext(filename)  # Получаем имя и расширение
+        sanitized_name = sanitize_filename(name)  # Санируем имя
+        new_filename = f"{sanitized_name}{ext.lower()}"  # Объединяем с расширением
+
+        old_file_path = os.path.join(directory, filename)
+        new_file_path = os.path.join(directory, new_filename)
+
+        if old_file_path != new_file_path:
+            os.rename(old_file_path, new_file_path)  # Переименовываем файл
+            print(f"Переименован: '{old_file_path}' -> '{new_file_path}'")
+
+if __name__ == "__main__":
+    directory_path = os.getcwd()  # Используем текущую директорию
+    rename_files_in_directory(directory_path)
